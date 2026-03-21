@@ -250,6 +250,12 @@
       border: 1px solid var(--line);
       background: rgba(255,255,255,.88);
       min-height: 138px;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .event:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(15,23,42,.12);
+      background: rgba(255,255,255,1);
     }
     .event.type-主持 { border-left: 5px solid #8bb8e0; }
     .event.type-单口 { border-left: 5px solid #a0d898; }
