@@ -1,533 +1,630 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>马达 · 每月演出行程</title>
-  <style>
-    :root {
-      --bg: #eef2f6;
-      --card: rgba(255,255,255,.78);
-      --line: rgba(15, 23, 42, .08);
-      --text: #0f172a;
-      --muted: #5b6472;
-      --accent: #111827;
-      --accent-soft: rgba(17,24,39,.08);
-      --host: #e8f0ff;
-      --standup: #eef7ea;
-      --other: #f7f0ff;
-      --shadow: 0 18px 60px rgba(15,23,42,.10);
-      --radius-xl: 28px;
-      --radius-lg: 20px;
-      --radius-md: 16px;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,.95) 0, rgba(255,255,255,.55) 30%, transparent 48%),
-        linear-gradient(180deg, #f3f6f9 0%, #e8edf3 100%);
-      min-height: 100vh;
-      padding: 28px;
-    }
-    .poster {
-      max-width: 1440px;
-      margin: 0 auto;
-      background: rgba(255,255,255,.46);
-      border: 1px solid rgba(255,255,255,.65);
-      backdrop-filter: blur(16px);
-      border-radius: 36px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px 28px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.45);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-      color: var(--muted);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-    .brand-mark {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #0f172a, #64748b);
-      box-shadow: 0 0 0 6px rgba(15,23,42,.06);
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    button {
-      border: 0;
-      background: white;
-      color: var(--text);
-      font: inherit;
-      padding: 10px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      border: 1px solid var(--line);
-      transition: .18s ease;
-    }
-    button:hover { transform: translateY(-1px); }
-    button.active { background: var(--accent); color: white; border-color: var(--accent); }
-    .hero {
-      display: grid;
-      grid-template-columns: 1.2fr .9fr;
-      gap: 16px;
-      padding: 16px 28px;
-      align-items: stretch;
-    }
-    .hero-card, .schedule, .info-panel {
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,.8);
-      border-radius: var(--radius-xl);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
-    }
-    .hero-card {
-      padding: 24px;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    .hero-card::after {
-      content: "";
-      position: absolute;
-      right: -80px;
-      top: -100px;
-      width: 280px;
-      height: 280px;
-      background: radial-gradient(circle, rgba(17,24,39,.09), transparent 60%);
-    }
-    .month {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-      border-radius: 999px;
-      padding: 8px 12px;
-      background: rgba(17,24,39,.05);
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 16px;
-      width: fit-content;
-    }
-    h1 {
-      font-size: clamp(28px, 4vw, 54px);
-      line-height: 1;
-      letter-spacing: -.04em;
-      margin: 0 0 12px;
-    }
-    .subtitle {
-      font-size: 15px;
-      line-height: 1.5;
-      color: var(--muted);
-      max-width: 720px;
-      margin: 0 0 16px;
-    }
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .chip {
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: white;
-      border: 1px solid var(--line);
-      color: var(--text);
-      font-size: 13px;
-    }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: auto;
-    }
-    .stat {
-      background: rgba(255,255,255,.72);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      padding: 18px;
-    }
-    .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 10px; letter-spacing: .06em; text-transform: uppercase; }
-    .stat-value { font-size: 34px; font-weight: 700; letter-spacing: -.03em; }
-    .info-panel {
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      height: 100%;
-    }
-    .portrait-wrap {
-      border-radius: 26px;
-      flex: 1;
-      min-height: 0;
-      background: linear-gradient(180deg, #eef2f7 0%, #dfe6ee 100%);
-      overflow: hidden;
-      display: flex;
-      align-items: end;
-      justify-content: center;
-      position: relative;
-    }
-    .portrait-wrap::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,.28), rgba(15,23,42,.06));
-      pointer-events: none;
-    }
-    .portrait {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center top;
-      display: block;
-    }
-    .contact-card {
-      border-radius: var(--radius-lg);
-      background: rgba(255,255,255,.84);
-      border: 1px solid var(--line);
-      padding: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: auto;
-    }
-    .mini-content { font-size: 14px; line-height: 1.5; color: var(--muted); text-align: center; }
-    .main { padding: 0 28px 28px; }
-    .schedule { padding: 20px; }
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      gap: 16px;
-      margin-bottom: 18px;
-      padding: 4px 4px 0;
-    }
-    .section-head h2 {
-      margin: 0;
-      font-size: 28px;
-      letter-spacing: -.03em;
-    }
-    .section-head p { margin: 6px 0 0; color: var(--muted); }
-    .legend { display: flex; gap: 8px; flex-wrap: wrap; }
-    .legend-item {
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      color: var(--text);
-      border: 1px solid var(--line);
-      background: white;
-    }
-    .events {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-    .event {
-      display: grid;
-      grid-template-columns: 92px 1fr;
-      gap: 16px;
-      padding: 18px;
-      padding-left: 22px;
-      border-radius: 22px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.88);
-      min-height: 138px;
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-    }
-    .event:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(15,23,42,.12);
-      background: rgba(255,255,255,1);
-    }
-    .event.type-主持 { border-left: 5px solid #8bb8e0; }
-    .event.type-单口 { border-left: 5px solid #a0d898; }
-    .event.type-其他 { border-left: 5px solid #c8a8e8; }
-    .event-date {
-      border-right: 1px solid var(--line);
-      padding-right: 14px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 100%;
-    }
-    .date-big { font-size: 28px; font-weight: 700; letter-spacing: -.05em; }
-    .date-small { color: var(--muted); font-size: 13px; }
-    .time {
-      display: inline-flex;
-      width: fit-content;
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(15,23,42,.06);
-      color: var(--text);
-    }
-    .event-title { font-size: 18px; line-height: 1.35; font-weight: 700; margin-bottom: 12px; }
-    .meta { display: grid; gap: 7px; color: var(--muted); font-size: 14px; }
-    .type-pill {
-      margin-top: 14px;
-      display: inline-flex;
-      width: fit-content;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .type-pill.type-主持 { background: var(--host); }
-    .type-pill.type-单口 { background: var(--standup); }
-    .type-pill.type-其他 { background: var(--other); }
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      padding: 0 28px 26px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .hidden { display: none !important; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>南京 · 三日烧香之旅</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF6EF;
+    --cream-2:#F4EADD;
+    --paper:#FFFFFF;
+    --ink:#2B2320;
+    --ink-soft:#5A4E45;
+    --muted:#8A7B6E;
+    --line:#EADDCD;
+    --coral:#FF385C;
+    --coral-soft:#FFE7EC;
+    --amber:#D98324;
+    --amber-soft:#FBE9CF;
+    --gold:#C29A4C;
+    --jade:#5E8A6E;
+    --shadow-sm:0 2px 8px rgba(60,40,20,.05);
+    --shadow:0 12px 40px rgba(80,52,24,.10);
+    --shadow-lg:0 24px 70px rgba(80,52,24,.16);
+    --r:24px;
+    --r-lg:32px;
+    --maxw:1140px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:84px}
+  body{
+    font-family:"Noto Sans SC",-apple-system,sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--coral);color:#fff}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
 
-    @media (max-width: 1100px) {
-      .hero { grid-template-columns: 1fr; gap: 0; padding: 16px; }
-      .events { grid-template-columns: 1fr; }
-      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .info-panel { display: none; }
-      .hero-card { padding: 16px; }
-      .portrait-wrap { display: none; }
-      .subtitle { display: none; }
-      .chips { display: none; }
-    }
-    @media (max-width: 780px) {
-      body { padding: 8px; }
-      .topbar { padding: 8px 12px; }
-      .hero { padding: 10px 12px; }
-      .hero-card { padding: 12px; }
-      h1 { font-size: 28px; margin-bottom: 6px; }
-      .month { margin-bottom: 8px; padding: 6px 10px; font-size: 12px; }
-      .stats { display: none; }
-      .main { padding: 0 12px 12px; }
-      .section-head h2 { font-size: 20px; }
-      .event { padding: 12px; min-height: auto; }
-    }
+  /* ---------- top nav ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:60;
+    backdrop-filter:saturate(180%) blur(14px);
+    background:rgba(251,246,239,.78);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s, box-shadow .3s;
+  }
+  header.nav.scrolled{border-color:var(--line);box-shadow:0 4px 24px rgba(80,52,24,.06)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.02em}
+  .brand .mark{width:34px;height:34px;display:grid;place-items:center;
+    background:var(--coral);border-radius:11px;box-shadow:0 6px 16px rgba(255,56,92,.32)}
+  .brand .mark svg{width:20px;height:20px;fill:#fff}
+  .brand b{font-size:16px}
+  .navlinks{display:flex;gap:6px;align-items:center}
+  .navlinks a{
+    font-size:14px;color:var(--ink-soft);text-decoration:none;
+    padding:9px 16px;border-radius:999px;transition:.2s;font-weight:500;
+  }
+  .navlinks a:hover{background:var(--cream-2);color:var(--ink)}
+  .navlinks .date-pill{
+    background:var(--ink);color:#fff;padding:9px 18px;border-radius:999px;font-size:13px;
+  }
+  .navlinks .date-pill:hover{background:var(--ink);color:#fff;transform:translateY(-1px)}
+  @media(max-width:760px){.navlinks a:not(.date-pill){display:none}}
 
-    @page { size: A4 portrait; margin: 0; }
-    @media print {
-      body { padding: 0; background: #f8f9fa; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
-      .poster { box-shadow: none; border: 0; border-radius: 0; max-width: 100%; background: white; overflow: visible; padding: 0; }
-      .topbar { display: none; }
-      .hero { display: block; padding: 40px 40px 20px; }
-      .hero-card { background: white; border: 0; border-radius: 0; box-shadow: none; padding: 0 0 24px; }
-      .month { display: none; }
-      h1 { font-size: 48px; margin-bottom: 8px; letter-spacing: -.03em; }
-      .subtitle { display: none; }
-      .chips { display: none; }
-      .stats { display: none; }
-      .info-panel { display: none; }
-      .main { padding: 0 40px 40px; }
-      .schedule { background: white; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
-      .section-head { display: none; }
-      .legend { display: none; }
-      .events { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .event { border: 0; border-left: 4px solid; border-radius: 0; border-bottom: 1px solid #eee; background: white; min-height: auto; padding: 12px 12px 12px 16px; }
-      .event-date { padding: 0; border: 0; display: flex; flex-direction: row; align-items: center; gap: 8px; min-height: auto; }
-      .date-big { font-size: 20px; font-weight: 700; }
-      .date-small { font-size: 12px; color: #888; }
-      .time { background: none; padding: 0; font-size: 12px; color: #666; border-radius: 0; }
-      .event-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-      .meta { display: none; }
-      .type-pill { margin-top: 6px; font-size: 11px; padding: 4px 8px; }
-      .footer { display: none; }
-      .event.type-主持 { border-left-color: #8bb8e0; }
-      .event.type-单口 { border-left-color: #a0d898; }
-      .event.type-其他 { border-left-color: #c8a8e8; }
-    }
-  </style>
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:64px 0 0;overflow:hidden}
+  .hero-art{position:absolute;inset:0;z-index:0}
+  .hero-art svg{width:100%;height:100%;display:block}
+  .hero-in{position:relative;z-index:2;padding:40px 0 220px;max-width:760px}
+  .kicker{
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:12px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--amber);font-weight:700;margin-bottom:24px;
+    background:rgba(255,255,255,.6);padding:8px 16px;border-radius:999px;
+    border:1px solid var(--amber-soft);
+  }
+  .kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--coral)}
+  .hero h1{
+    font-family:"Noto Serif SC",serif;font-weight:900;
+    font-size:clamp(44px,8.5vw,92px);line-height:1.04;
+    letter-spacing:-.01em;color:var(--ink);
+  }
+  .hero h1 em{font-style:normal;color:var(--coral)}
+  .hero .sub-en{
+    font-family:"Fraunces",serif;font-style:italic;font-weight:400;
+    font-size:clamp(22px,4vw,40px);color:var(--amber);margin-top:8px;letter-spacing:.01em;
+  }
+  .hero p.lead{
+    font-size:clamp(16px,2vw,19px);color:var(--ink-soft);margin-top:26px;max-width:560px;font-weight:300;
+  }
+  .hero-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px}
+  .meta-chip{
+    background:var(--paper);border:1px solid var(--line);border-radius:18px;
+    padding:14px 20px;box-shadow:var(--shadow-sm);
+  }
+  .meta-chip .k{font-size:12px;color:var(--muted);letter-spacing:.05em}
+  .meta-chip .v{font-size:18px;font-weight:700;font-family:"Noto Serif SC",serif;line-height:1.3}
+  .meta-chip .v small{font-size:12px;font-weight:400;color:var(--muted)}
+
+  /* float-up animation */
+  .fu{opacity:0;transform:translateY(26px);animation:fu .9s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes fu{to{opacity:1;transform:none}}
+  .d1{animation-delay:.05s}.d2{animation-delay:.18s}.d3{animation-delay:.31s}
+  .d4{animation-delay:.44s}.d5{animation-delay:.57s}
+
+  /* reveal on scroll */
+  .rv{opacity:0;transform:translateY(34px);transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1)}
+  .rv.in{opacity:1;transform:none}
+
+  /* ---------- overview ---------- */
+  section{position:relative;z-index:3}
+  .overview{background:var(--cream);padding:14px 0 80px;position:relative;margin-top:-90px}
+  .ov-card{
+    background:var(--paper);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);
+    padding:54px 56px;border:1px solid var(--line);
+  }
+  .ov-top{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;align-items:flex-end}
+  .ov-top h2{font-family:"Noto Serif SC",serif;font-weight:700;font-size:clamp(26px,3.4vw,38px);line-height:1.25;max-width:560px}
+  .ov-top p{color:var(--ink-soft);max-width:360px;font-weight:300;font-size:15px}
+  .day-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:42px}
+  @media(max-width:820px){.day-cards{grid-template-columns:1fr}.ov-card{padding:36px 26px}}
+  .dc{
+    text-decoration:none;color:inherit;display:block;
+    background:var(--cream);border:1px solid var(--line);border-radius:var(--r);
+    padding:26px 24px 24px;transition:.35s cubic-bezier(.2,.7,.2,1);position:relative;overflow:hidden;
+  }
+  .dc::before{content:"";position:absolute;inset:0;background:linear-gradient(160deg,transparent,var(--accent,var(--amber-soft)));opacity:0;transition:.35s}
+  .dc:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:transparent}
+  .dc:hover::before{opacity:.5}
+  .dc .num{font-family:"Fraunces",serif;font-size:46px;line-height:1;color:var(--accent-strong,var(--amber));position:relative}
+  .dc .lbl{font-size:12px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:6px;position:relative}
+  .dc h3{font-family:"Noto Serif SC",serif;font-size:21px;margin-top:14px;position:relative}
+  .dc .route{font-size:13px;color:var(--ink-soft);margin-top:10px;position:relative;line-height:1.6}
+  .dc .go{margin-top:18px;display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--coral);position:relative}
+  .dc .go svg{width:15px;height:15px;transition:.3s}
+  .dc:hover .go svg{transform:translateX(4px)}
+
+  /* ---------- day section ---------- */
+  .day{padding:70px 0 30px}
+  .day-head{display:flex;align-items:baseline;gap:24px;flex-wrap:wrap;margin-bottom:8px}
+  .day-tag{
+    font-family:"Fraunces",serif;font-size:clamp(50px,8vw,84px);line-height:.9;
+    color:var(--amber);font-weight:500;
+  }
+  .day-head .ttl{flex:1;min-width:240px}
+  .day-head .ttl .date{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .day-head .ttl h2{font-family:"Noto Serif SC",serif;font-size:clamp(26px,4vw,40px);line-height:1.2;margin-top:6px}
+  .day-head .ttl .sumline{color:var(--ink-soft);font-size:15px;margin-top:10px;font-weight:300}
+  .divider{height:1px;background:linear-gradient(90deg,var(--line),transparent);margin:30px 0 8px}
+
+  /* timeline */
+  .tl{position:relative;margin-top:18px}
+  .stop{display:grid;grid-template-columns:110px 1fr;column-gap:40px;position:relative;padding-bottom:4px}
+  .time-col{text-align:right;padding-top:26px}
+  .time-col .t1{font-family:"Noto Serif SC",serif;font-weight:700;font-size:19px;line-height:1.1}
+  .time-col .t2{font-size:12px;color:var(--muted);margin-top:2px}
+  .rail{position:absolute;left:110px;top:0;bottom:-58px;width:40px;pointer-events:none}
+  .rail::before{content:"";position:absolute;left:19px;top:26px;bottom:0;width:2px;
+    background:linear-gradient(180deg,var(--line),var(--line) 70%,transparent)}
+  .stop:last-child .rail::before{display:none}
+  .node{
+    position:absolute;left:6px;top:26px;width:28px;height:28px;border-radius:50%;
+    background:var(--paper);border:2px solid var(--amber);display:grid;place-items:center;z-index:2;
+  }
+  .node svg{width:14px;height:14px;fill:var(--amber)}
+  .stop.dusk .node{border-color:var(--coral)}
+  .stop.dusk .node svg{fill:var(--coral)}
+  .card{
+    background:var(--paper);border:1px solid var(--line);
+    border-radius:var(--r);padding:24px 28px;box-shadow:var(--shadow-sm);
+    transition:.35s cubic-bezier(.2,.7,.2,1);
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--amber-soft)}
+  .card .ctop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .card h3{font-family:"Noto Serif SC",serif;font-size:23px;line-height:1.2}
+  .card h3 small{display:block;font-family:"Fraunces",serif;font-style:italic;font-weight:400;
+    font-size:13px;color:var(--muted);margin-top:3px;letter-spacing:.04em}
+  .badge{font-size:12px;font-weight:600;padding:5px 13px;border-radius:999px;white-space:nowrap}
+  .badge.core{background:var(--coral-soft);color:var(--coral)}
+  .badge.night{background:#2B2320;color:#FBE9CF}
+  .badge.soft{background:var(--amber-soft);color:var(--amber)}
+  .badge.cult{background:#E8F0E9;color:var(--jade)}
+  .card p{color:var(--ink-soft);font-size:14.5px;margin-top:12px;font-weight:300}
+  .tip{display:flex;gap:9px;margin-top:14px;padding:11px 14px;background:var(--cream);
+    border-radius:14px;font-size:13px;color:var(--ink-soft)}
+  .tip svg{width:16px;height:16px;flex-shrink:0;margin-top:3px;fill:var(--amber)}
+  .transit{
+    margin:4px 0 4px 150px;display:flex;align-items:center;gap:10px;
+    font-size:12.5px;color:var(--muted);padding:8px 0;
+  }
+  .transit .ic{width:26px;height:26px;border-radius:9px;background:var(--cream-2);
+    display:grid;place-items:center;flex-shrink:0}
+  .transit .ic svg{width:14px;height:14px;fill:var(--ink-soft)}
+  .transit .ln{flex:1;height:1px;background:repeating-linear-gradient(90deg,var(--line) 0 5px,transparent 5px 11px)}
+
+  @media(max-width:680px){
+    .stop{grid-template-columns:1fr;gap:6px}
+    .time-col{text-align:left;padding-top:4px;padding-left:48px}
+    .time-col .t1{font-size:16px}
+    .rail{display:none}
+    .card{margin-left:0}
+    .transit{margin-left:0}
+  }
+
+  /* ---------- tips ---------- */
+  .tips{padding:80px 0 30px}
+  .tips h2{font-family:"Noto Serif SC",serif;font-size:clamp(26px,4vw,40px);text-align:center}
+  .tips .sub{text-align:center;color:var(--ink-soft);margin-top:10px;font-weight:300}
+  .tipgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:44px}
+  @media(max-width:880px){.tipgrid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:480px){.tipgrid{grid-template-columns:1fr}}
+  .tg{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+    padding:28px 24px;transition:.35s;text-align:center}
+  .tg:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+  .tg .ic{width:54px;height:54px;border-radius:16px;margin:0 auto 16px;display:grid;place-items:center;
+    background:var(--amber-soft)}
+  .tg .ic svg{width:26px;height:26px;fill:var(--amber)}
+  .tg h4{font-family:"Noto Serif SC",serif;font-size:18px}
+  .tg p{font-size:13.5px;color:var(--ink-soft);margin-top:8px;font-weight:300;line-height:1.6}
+
+  /* ---------- footer ---------- */
+  footer{margin-top:80px;background:var(--ink);color:#EFE3D5;padding:64px 0 40px;position:relative;overflow:hidden}
+  footer .fart{position:absolute;right:-40px;bottom:-30px;opacity:.16;width:320px}
+  footer .fart svg{width:100%;fill:#E8B57A}
+  .foot-in{position:relative;z-index:2}
+  footer .ftitle{font-family:"Noto Serif SC",serif;font-size:clamp(26px,4vw,42px);max-width:520px;line-height:1.25}
+  footer .ftitle em{font-style:normal;color:#FFB07A}
+  footer .fmeta{display:flex;gap:38px;flex-wrap:wrap;margin-top:36px;color:#C7B6A4;font-size:14px}
+  footer .fmeta b{display:block;color:#fff;font-family:"Noto Serif SC",serif;font-size:17px;font-weight:600;margin-bottom:3px}
+  footer .fnote{margin-top:40px;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);
+    font-size:12.5px;color:#9A8A7A;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+</style>
 </head>
 <body>
-  <div class="poster">
-    <div class="topbar">
-      <div class="brand">
-        <span class="brand-mark"></span>
-        <span>Comedian Schedule</span>
-      </div>
-      <div class="actions filters" id="filters"></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <div class="brand">
+      <span class="mark">
+        <svg viewBox="0 0 24 24"><path d="M12 2c-1.6 3.4-4 5.2-7 6 2.4.6 5 2.2 7 6 2-3.8 4.6-5.4 7-6-3-.8-5.4-2.6-7-6z"/></svg>
+      </span>
+      <b>南京 · 礼佛三日</b>
     </div>
+    <nav class="navlinks">
+      <a href="#day1">Day 1</a>
+      <a href="#day2">Day 2</a>
+      <a href="#day3">Day 3</a>
+      <a href="#tips">实用贴士</a>
+      <a href="#hero" class="date-pill">6.20 – 6.22</a>
+    </nav>
+  </div>
+</header>
 
-    <section class="hero">
-      <div class="hero-card">
-        <div class="month" id="monthTag">2026 / 03 月行程</div>
-        <h1 id="performerName">马达<br/>Monthly Schedule</h1>
-        <p class="subtitle" id="performerIntro"></p>
-        <div class="chips" id="brandChips"></div>
-        <div class="stats">
-          <div class="stat"><div class="stat-label">Shows</div><div class="stat-value" id="statShows">20</div></div>
-          <div class="stat"><div class="stat-label">Brands</div><div class="stat-value" id="statCities">6</div></div>
-          <div class="stat"><div class="stat-label">Host</div><div class="stat-value" id="statHost">0</div></div>
-          <div class="stat"><div class="stat-label">Stand-up</div><div class="stat-value" id="statStandup">0</div></div>
-        </div>
-      </div>
-
-      <div class="info-panel">
-        <div class="portrait-wrap">
-          <img id="portraitImg" class="portrait" src="" alt="Portrait">
-        </div>
-        <div class="contact-card">
-          <div class="mini-content">📍 票务：大麦 / 猫眼 &nbsp;&nbsp;&nbsp; 📣 小红书：@趣听喜剧 | @马达脱口秀</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="main">
-      <div class="schedule">
-        <div class="section-head">
-          <div>
-            <h2>本月演出行程</h2>
-            <p>本月演出行程，持续更新中。</p>
-          </div>
-          <div class="legend">
-            <span class="legend-item">主持</span>
-            <span class="legend-item">单口</span>
-            <span class="legend-item">其他</span>
-          </div>
-        </div>
-        <div class="events" id="events"></div>
-      </div>
-
-    </section>
-
-    <div class="footer">
-      <div>© 2026 马达 · 趣听喜剧</div>
-      <div>演出信息如有变动，以剧场官方发布为准</div>
-    </div>
+<!-- ============ HERO ============ -->
+<section class="hero" id="hero">
+  <div class="hero-art" aria-hidden="true">
+    <svg viewBox="0 0 1440 760" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FFFBF4"/>
+          <stop offset="45%" stop-color="#FFF1DE"/>
+          <stop offset="100%" stop-color="#FFE0BE"/>
+        </linearGradient>
+        <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#FFD592"/>
+          <stop offset="55%" stop-color="#FFCB80" stop-opacity=".6"/>
+          <stop offset="100%" stop-color="#FFCB80" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="h1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#F3CC93"/><stop offset="1" stop-color="#EBBE7E"/>
+        </linearGradient>
+        <linearGradient id="h2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#E2A85F"/><stop offset="1" stop-color="#D6974B"/>
+        </linearGradient>
+      </defs>
+      <rect width="1440" height="760" fill="url(#sky)"/>
+      <circle cx="1080" cy="250" r="320" fill="url(#sun)"/>
+      <circle cx="1080" cy="250" r="92" fill="#FFE7B8" opacity=".85"/>
+      <!-- distant hills -->
+      <path d="M0 560 Q260 470 520 540 T1060 510 T1440 560 V760 H0Z" fill="url(#h1)" opacity=".75"/>
+      <path d="M0 630 Q320 540 640 610 T1180 580 T1440 630 V760 H0Z" fill="url(#h2)"/>
+      <!-- pagoda silhouette -->
+      <g fill="#B97A3E" opacity=".92" transform="translate(210,300)">
+        <rect x="44" y="300" width="32" height="60" rx="3"/>
+        <path d="M10 300 L110 300 L92 270 L28 270 Z"/>
+        <rect x="34" y="232" width="52" height="40" rx="3"/>
+        <path d="M16 232 L104 232 L88 206 L32 206 Z"/>
+        <rect x="38" y="172" width="44" height="36" rx="3"/>
+        <path d="M22 172 L98 172 L84 148 L36 148 Z"/>
+        <rect x="42" y="118" width="36" height="32" rx="3"/>
+        <path d="M28 118 L92 118 L80 96 L40 96 Z"/>
+        <path d="M60 96 L60 64 M48 78 H72" stroke="#B97A3E" stroke-width="5"/>
+        <circle cx="60" cy="62" r="7"/>
+      </g>
+      <!-- incense smoke -->
+      <g stroke="#C99A5E" stroke-width="2.4" fill="none" opacity=".4" stroke-linecap="round">
+        <path class="smoke s-a" d="M760 700 C748 660 776 640 762 600 C750 566 772 548 762 512"/>
+        <path class="smoke s-b" d="M810 700 C800 668 822 650 812 616 C802 588 820 572 812 542"/>
+        <path class="smoke s-c" d="M712 700 C704 672 722 656 714 628 C706 604 720 590 714 566"/>
+      </g>
+    </svg>
   </div>
 
-  <script>
-    const config = {
-      performerName: "马达",
-      portraitUrl: "portrait.jpg",
-      monthLabel: "2026 年 3 月",
-      intro: "🎙️ 趣听喜剧签约演员 | 前微软产品经理 | 一个慈祥的中年人 🏆 16届喜番新梗赛季军 & 25-26年度喜番新梗赛特别奖 & 第八届单立人喜剧大赛卡司 📅 每月演出行程持续更新，欢迎关注",
-   events: [
-  // === 3月 ===
-  {"date": "03.01", "weekday": "周日", "time": "16:30", "brand": "喜番", "venue": "喜番 club", "type": "单口", "title": "开放麦"},
-  {"date": "03.07", "weekday": "周六", "time": "19:50", "brand": "惊讶喜剧", "venue": "迷你秀", "type": "单口", "title": "迷你秀"},
-  {"date": "03.08", "weekday": "周日", "time": "13:30", "brand": "趣听", "venue": "趣空间", "type": "其他", "title": "趣你的吧录制"},
-  {"date": "03.09", "weekday": "周一", "time": "19:00", "brand": "单立人", "venue": "单立人 downtown", "type": "主持", "title": "开放麦"},
-  {"date": "03.10", "weekday": "周二", "time": "19:00", "brand": "猫头鹰", "venue": "Nest 巢空间", "type": "主持", "title": "开放麦"},
-  {"date": "03.12", "weekday": "周四", "time": "20:00", "brand": "喜番", "venue": "喜番 club", "type": "单口", "title": "开放麦"},
-  {"date": "03.13", "weekday": "周五", "time": "19:30", "brand": "猫头鹰", "venue": "Nest 巢空间", "type": "单口", "title": "拼盘秀"},
-  {"date": "03.13", "weekday": "周五", "time": "20:00", "brand": "趣听", "venue": "趣空间", "type": "单口", "title": "拼盘秀"},
-  {"date": "03.14", "weekday": "周六", "time": "17:00", "brand": "单立人", "venue": "单立人 downtown", "type": "单口", "title": "刘骙专场"},
-  {"date": "03.14", "weekday": "周六", "time": "20:00", "brand": "趣听", "venue": "趣空间", "type": "主持", "title": "拼盘秀"},
-  {"date": "03.21", "weekday": "周六", "time": "16:00", "brand": "趣听", "venue": "趣空间", "type": "单口", "title": "拼盘秀"},
-  {"date": "03.21", "weekday": "周六", "time": "19:30", "brand": "猫头鹰", "venue": "Nest 巢空间", "type": "主持", "title": "拼盘秀"},
-  {"date": "03.22", "weekday": "周日", "time": "16:00", "brand": "趣听", "venue": "趣空间", "type": "其他", "title": "即兴运动会"},
-  {"date": "03.27", "weekday": "周五", "time": "20:00", "brand": "趣听", "venue": "趣空间", "type": "单口", "title": "拼盘秀"},
-  {"date": "03.28", "weekday": "周六", "time": "16:00", "brand": "趣听", "venue": "趣空间", "type": "单口", "title": "拼盘秀"},
-  {"date": "03.28", "weekday": "周六", "time": "16:30", "brand": "猫头鹰", "venue": "Nest 巢空间", "type": "单口", "title": "拼盘秀"},
-  {"date": "03.28", "weekday": "周六", "time": "19:30", "brand": "猫头鹰", "venue": "Nest 巢空间", "type": "主持", "title": "拼盘秀"},
-  {"date": "03.29", "weekday": "周日", "time": "16:00", "brand": "趣听", "venue": "趣空间", "type": "单口", "title": "拼盘秀"},
-  {"date": "03.29", "weekday": "周日", "time": "18:00", "brand": "趣听", "venue": "趣空间", "type": "单口", "title": "开放麦 Pro"},
-  
-  // === 4月 ===
-  {"date": "04.01", "weekday": "周三", "time": "20:00", "brand": "喜番", "venue": "喜番 club", "type": "主持", "title": "开放麦"},
-  {"date": "04.03", "weekday": "周五", "time": "20:30", "brand": "喜番", "venue": "喜番 club", "type": "主持", "title": "拼盘秀"},
-  {"date": "04.04", "weekday": "周六", "time": "16:30", "brand": "猫头鹰", "venue": "Nest 巢空间", "type": "主持", "title": "拼盘秀"},
-  {"date": "04.04", "weekday": "周六", "time": "19:30", "brand": "猫头鹰", "venue": "Nest 巢空间", "type": "主持", "title": "拼盘秀"},
-  {"date": "04.05", "weekday": "周日", "time": "16:30", "brand": "单立人", "venue": "单立人 downtown", "type": "主持", "title": "马军专场"},
-  {"date": "04.06", "weekday": "周一", "time": "16:00", "brand": "喜番", "venue": "喜番 club", "type": "主持", "title": "开放麦"},
-  {"date": "04.10", "weekday": "周五", "time": "20:30", "brand": "喜番", "venue": "喜番 club", "type": "主持", "title": "拼盘秀"},
-  {"date": "04.11", "weekday": "周六", "time": "16:00", "brand": "单立人", "venue": "单立人 downtown", "type": "主持", "title": "拼盘秀"},
-  {"date": "04.11", "weekday": "周六", "time": "19:30", "brand": "单立人", "venue": "单立人 downtown", "type": "主持", "title": "拼盘秀"},
-  {"date": "04.12", "weekday": "周日", "time": "16:00", "brand": "单立人", "venue": "单立人 downtown", "type": "主持", "title": "拼盘秀"},
-  {"date": "04.12", "weekday": "周日", "time": "19:30", "brand": "单立人", "venue": "单立人 downtown", "type": "主持", "title": "拼盘秀"},
-  {"date": "04.18", "weekday": "周六", "time": "19:30", "brand": "一支麦", "venue": "比赛场", "type": "比赛", "title": "初赛"},
-  {"date": "04.25", "weekday": "周六", "time": "16:30", "brand": "趣听", "venue": "趣空间", "type": "单口", "title": "开场"},
-  {"date": "04.26", "weekday": "周日", "time": "19:30", "brand": "单立人", "venue": "单立人 downtown", "type": "主持", "title": "阿泰北京专场"}
-]
-    
-    };
+  <div class="wrap hero-in">
+    <span class="kicker fu d1"><span class="dot"></span>BUDDHIST PILGRIMAGE · NANJING</span>
+    <h1 class="fu d2">三日<em>烧香</em>之旅<br>古刹问禅</h1>
+    <div class="sub-en fu d3">A Three-Day Temple Pilgrimage</div>
+    <p class="lead fu d4">从城南古刹到钟山名寺，再以鸡鸣寺与秦淮收尾。九座寺院，一条从容的礼佛动线——慢一点，留些呼吸的余地。</p>
+    <div class="hero-meta fu d5">
+      <div class="meta-chip"><div class="k">行程</div><div class="v">3 天 2 夜</div></div>
+      <div class="meta-chip"><div class="k">古刹</div><div class="v">9 处 <small>寺院 / 古迹</small></div></div>
+      <div class="meta-chip"><div class="k">日期</div><div class="v">6.20 – 6.22</div></div>
+      <div class="meta-chip"><div class="k">驻地</div><div class="v">南京洲际酒店</div></div>
+    </div>
+  </div>
+</section>
 
-    const monthOrder = ["全部", "本月", "下个月"];
-    let currentMonth = "本月";
+<!-- ============ OVERVIEW ============ -->
+<section class="overview">
+  <div class="wrap">
+    <div class="ov-card rv">
+      <div class="ov-top">
+        <h2>三天的节奏，<br>不赶路，慢慢拜。</h2>
+        <p>第一天入城轻礼、夜访宝塔；第二天深入栖霞，是全程的核心古刹日；第三天钟山收官，再以文庙与秦淮作文化尾声。</p>
+      </div>
+      <div class="day-cards">
+        <a class="dc" href="#day1" style="--accent:var(--amber-soft);--accent-strong:var(--amber)">
+          <div class="num">01</div>
+          <div class="lbl">6 / 20 · 周五</div>
+          <h3>入城 · 古刹与夜塔</h3>
+          <div class="route">清凉寺 · 玄奘寺三藏塔 · 大报恩寺夜游</div>
+          <span class="go">查看当日行程 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a class="dc" href="#day2" style="--accent:var(--coral-soft);--accent-strong:var(--coral)">
+          <div class="num">02</div>
+          <div class="lbl">6 / 21 · 周六</div>
+          <h3>栖霞访古 · 核心日</h3>
+          <div class="route">毗卢寺 · 栖霞寺 · 灵谷寺</div>
+          <span class="go">查看当日行程 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a class="dc" href="#day3" style="--accent:#E8F0E9;--accent-strong:var(--jade)">
+          <div class="num">03</div>
+          <div class="lbl">6 / 22 · 周日</div>
+          <h3>钟山收官 · 秦淮</h3>
+          <div class="route">鸡鸣寺 · 夫子庙 / 秦淮河 · 返程</div>
+          <span class="go">查看当日行程 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 
-    const byId = (id) => document.getElementById(id);
-    const brands = [...new Set(config.events.map(item => item.brand))];
-    const thisMonth = config.events.filter(i => i.date.startsWith("03"));
-    const nextMonth = config.events.filter(i => i.date.startsWith("04"));
-    const stats = {
-      shows: config.events.length,
-      brands: brands.length,
-      host: config.events.filter(i => i.type === "主持").length,
-      standup: config.events.filter(i => i.type === "单口").length,
-    };
+<!-- ============ DAY 1 ============ -->
+<section class="day" id="day1">
+  <div class="wrap">
+    <div class="day-head rv">
+      <div class="day-tag">01</div>
+      <div class="ttl">
+        <div class="date">Day One · 6 月 20 日 · 周五</div>
+        <h2>入城初礼，夜访报恩</h2>
+        <div class="sumline">13:24 抵南京南站 · 清凉寺 → 玄奘寺三藏塔 → 大报恩寺夜游</div>
+      </div>
+    </div>
+    <div class="divider rv"></div>
 
-    byId('performerName').innerHTML = `${config.performerName}<br/>Monthly Schedule`;
-    byId('portraitImg').src = config.portraitUrl;
-    byId('monthTag').textContent = config.monthLabel;
-    byId('performerIntro').textContent = config.intro;
-    byId('statShows').textContent = stats.shows;
-    byId('statCities').textContent = stats.brands;
-    byId('statHost').textContent = stats.host;
-    byId('statStandup').textContent = stats.standup;
-
-    byId('brandChips').innerHTML = brands.map(brand => `<span class="chip">${brand}</span>`).join('');
-
-    function renderFilters() {
-      byId('filters').innerHTML = monthOrder.map(month => `
-        <button class="${currentMonth === month ? 'active' : ''}" onclick="setMonth('${month}')">${month}</button>
-      `).join('') + `<button onclick="window.print()">打印 / 导出 PDF</button>`;
-    }
-
-    function renderEvents() {
-      let list = config.events;
-      if (currentMonth === '本月') list = thisMonth;
-      else if (currentMonth === '下个月') list = nextMonth;
-      byId('events').innerHTML = list.map(item => `
-        <article class="event type-${item.type}">
-          <div class="event-date">
-            <div>
-              <div class="date-big">${item.date}</div>
-              <div class="date-small">${item.weekday}</div>
-            </div>
-            <div class="time">${item.time}</div>
+    <div class="tl">
+      <!-- arrival -->
+      <div class="stop rv">
+        <div class="time-col"><div class="t1">13:24</div><div class="t2">抵达 / 入住</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M4 15V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-1l1 2h-2l-1-2H8l-1 2H5l1-2H6a2 2 0 0 1-2-2zm3-7h10V6H7v2zm1 6a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm8 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>抵达南京南站<small>Check in · 南京洲际酒店</small></h3>
+            <span class="badge soft">入住</span>
           </div>
-          <div>
-            <div class="event-title">${item.title}</div>
-            <div class="meta">
-              <div>厂牌：${item.brand}</div>
-              <div>剧场：${item.venue}</div>
-            </div>
-            <span class="type-pill type-${item.type}">${item.type}</span>
+          <p>13:30–14:20 打车到酒店办理入住、放行李；14:50 从酒店出发，正式开启第一天的礼佛动线。</p>
+        </div>
+      </div>
+
+      <div class="transit"><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11h.5a1.5 1.5 0 0 1 1.5 1.5V17a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H7v1a1 1 0 0 1-2 0v-1H4a1 1 0 0 1-1-1v-4.5A1.5 1.5 0 0 1 4.5 11H5zm2 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM6.8 11h10.4l-1-3H7.8l-1 3z"/></svg></span><span class="ln"></span>打车前往清凉山</div>
+
+      <!-- 清凉寺 -->
+      <div class="stop rv">
+        <div class="time-col"><div class="t1">15:10</div><div class="t2">– 16:10</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm2-3h14l-7-9-7 9zm7-12l3 4H9l3-4zM11 3h2v3h-2V3z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>清凉寺 · 清凉山<small>Qingliang Temple</small></h3>
+            <span class="badge soft">第一站</span>
           </div>
-        </article>
-      `).join('');
-    }
+          <p>城中山寺，带着法眼宗祖庭的线索，最适合作为入城第一站。控制在 1 小时左右，浅游即可，不深逛清凉山。</p>
+          <div class="tip"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2zm-3 18a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9v1z"/></svg>当天体力尚足，但留住节奏——把第一站作为"开场"，从容拜过即可。</div>
+        </div>
+      </div>
 
-    window.setMonth = (month) => {
-      currentMonth = month;
-      renderFilters();
-      renderEvents();
-    };
+      <div class="transit"><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11h.5a1.5 1.5 0 0 1 1.5 1.5V17a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H7v1a1 1 0 0 1-2 0v-1H4a1 1 0 0 1-1-1v-4.5A1.5 1.5 0 0 1 4.5 11H5zm2 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM6.8 11h10.4l-1-3H7.8l-1 3z"/></svg></span><span class="ln"></span>16:10–16:40 打车 · 清凉寺 → 九华山</div>
 
-    renderFilters();
-    renderEvents();
-  </script>
+      <!-- 玄奘寺 -->
+      <div class="stop rv">
+        <div class="time-col"><div class="t1">16:40</div><div class="t2">– 17:25</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm2-3h14l-7-9-7 9zm7-12l3 4H9l3-4zM11 3h2v3h-2V3z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>九华山 · 玄奘寺 · 三藏塔<small>Xuanzang Temple · Sanzang Pagoda</small></h3>
+            <span class="badge soft">轻拜</span>
+          </div>
+          <p>山下玄奘寺先拜一拜，时间充裕再上看三藏塔。不强爬、不久留，把体力留给后面的夜游。</p>
+          <div class="tip"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11h-2V7h2v6zm0 4h-2v-2h2v2z"/></svg>玄奘寺供奉玄奘顶骨舍利，氛围庄重；登塔与否视当时体力与人流而定。</div>
+        </div>
+      </div>
+
+      <div class="transit"><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11h.5a1.5 1.5 0 0 1 1.5 1.5V17a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H7v1a1 1 0 0 1-2 0v-1H4a1 1 0 0 1-1-1v-4.5A1.5 1.5 0 0 1 4.5 11H5zm2 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM6.8 11h10.4l-1-3H7.8l-1 3z"/></svg></span><span class="ln"></span>17:25–18:00 打车 · 中华门 / 大报恩寺遗址</div>
+
+      <!-- 大报恩寺 -->
+      <div class="stop rv dusk">
+        <div class="time-col"><div class="t1">18:00</div><div class="t2">夜游 起</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M12 3l2 5 5 .4-3.8 3.3L16.5 17 12 14.2 7.5 17l1.3-5.3L5 8.4 10 8z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>大报恩寺遗址 · 夜游<small>Great Bao'en Temple — Night Visit</small></h3>
+            <span class="badge night">夜场 · 压轴</span>
+          </div>
+          <p>当天的压轴。看琉璃报恩塔夜景、舍利地宫与遗址展陈，灯火与塔影是第一天最值得驻足的画面。</p>
+          <div class="tip"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11h-2V7h2v6zm0 4h-2v-2h2v2z"/></svg>是否有夜场、登塔、点灯活动以官方票务页为准，建议出发前再确认当日开放时间。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DAY 2 ============ -->
+<section class="day" id="day2">
+  <div class="wrap">
+    <div class="day-head rv">
+      <div class="day-tag" style="color:var(--coral)">02</div>
+      <div class="ttl">
+        <div class="date">Day Two · 6 月 21 日 · 周六</div>
+        <h2>栖霞访古，三论祖庭</h2>
+        <div class="sumline">全程核心古刹日 · 毗卢寺 → 栖霞寺 → 灵谷寺</div>
+      </div>
+    </div>
+    <div class="divider rv"></div>
+
+    <div class="tl">
+      <!-- 毗卢寺 -->
+      <div class="stop rv">
+        <div class="time-col"><div class="t1">08:40</div><div class="t2">– 09:30</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm2-3h14l-7-9-7 9zm7-12l3 4H9l3-4zM11 3h2v3h-2V3z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>毗卢寺<small>Pilu Temple</small></h3>
+            <span class="badge soft">晨拜</span>
+          </div>
+          <p>离酒店近，早上先来拜。比原计划的 40 分钟稍放宽到约 50 分钟，让一天有个从容的开场。</p>
+        </div>
+      </div>
+
+      <div class="transit"><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11h.5a1.5 1.5 0 0 1 1.5 1.5V17a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H7v1a1 1 0 0 1-2 0v-1H4a1 1 0 0 1-1-1v-4.5A1.5 1.5 0 0 1 4.5 11H5zm2 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM6.8 11h10.4l-1-3H7.8l-1 3z"/></svg></span><span class="ln"></span>09:30–10:20 打车 · 毗卢寺 → 栖霞寺</div>
+
+      <!-- 栖霞寺 -->
+      <div class="stop rv">
+        <div class="time-col"><div class="t1">10:20</div><div class="t2">– 13:10</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm2-3h14l-7-9-7 9zm7-12l3 4H9l3-4zM11 3h2v3h-2V3z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>栖霞寺 · 千佛岩 · 舍利塔<small>Qixia Temple</small></h3>
+            <span class="badge core">核心古刹</span>
+          </div>
+          <p>这一天的重头戏。重点看三论宗祖庭、舍利塔与千佛岩造像，约三小时从容细看，不必深爬整座栖霞山。</p>
+          <div class="tip"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2zm-3 18a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9v1z"/></svg>把时间花在舍利塔石刻与千佛岩上，比登顶更值得；山路浅尝即止，保留下午体力。</div>
+        </div>
+      </div>
+
+      <div class="transit"><span class="ic"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.1 1.5 3.9 3.5 4.4V22h2v-8.6C10.5 12.9 12 11.1 12 9V2h-1v7zM16 6v8h2.5v8H21V2c-2.8 0-5 2.2-5 4z"/></svg></span><span class="ln"></span>13:10–13:50 午餐 · 转场缓冲</div>
+
+      <!-- 灵谷寺 -->
+      <div class="stop rv">
+        <div class="time-col"><div class="t1">14:30</div><div class="t2">– 16:40</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm2-3h14l-7-9-7 9zm7-12l3 4H9l3-4zM11 3h2v3h-2V3z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>灵谷寺 · 无梁殿 · 灵谷塔<small>Linggu Temple</small></h3>
+            <span class="badge soft">午后</span>
+          </div>
+          <p>13:50–14:30 打车前往。重点看无梁殿、灵谷寺与灵谷塔外观；体力够再登塔，否则在塔下观景同样从容。</p>
+          <div class="tip"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11h-2V7h2v6zm0 4h-2v-2h2v2z"/></svg>无梁殿是灵谷一绝，不要错过；登塔为可选项，按当下状态决定即可。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DAY 3 ============ -->
+<section class="day" id="day3">
+  <div class="wrap">
+    <div class="day-head rv">
+      <div class="day-tag" style="color:var(--jade)">03</div>
+      <div class="ttl">
+        <div class="date">Day Three · 6 月 22 日 · 周日</div>
+        <h2>钟山收官，秦淮作尾</h2>
+        <div class="sumline">鸡鸣寺收官礼佛 → 夫子庙 / 秦淮河 → 南京南站返程</div>
+      </div>
+    </div>
+    <div class="divider rv"></div>
+
+    <div class="tl">
+      <!-- 鸡鸣寺 -->
+      <div class="stop rv">
+        <div class="time-col"><div class="t1">09:30</div><div class="t2">– 10:50</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm2-3h14l-7-9-7 9zm7-12l3 4H9l3-4zM11 3h2v3h-2V3z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>鸡鸣寺<small>Jiming Temple</small></h3>
+            <span class="badge core">收官礼佛</span>
+          </div>
+          <p>作为全程的收官礼佛。主殿、药师佛塔，以及台城、玄武湖的视野，都可以从从容容地看一遍。</p>
+        </div>
+      </div>
+
+      <div class="transit"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 15V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-1l1 2h-2l-1-2H8l-1 2H5l1-2H6a2 2 0 0 1-2-2zm3-7h10V6H7v2z"/></svg></span><span class="ln"></span>10:50–11:30 回酒店退房 / 取行李（鸡鸣寺离酒店近，最稳）</div>
+
+      <!-- 夫子庙 -->
+      <div class="stop rv">
+        <div class="time-col"><div class="t1">12:00</div><div class="t2">– 15:30</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M12 3 2 9l10 6 10-6-10-6zm0 13.2L4.5 11.7 4 12v4l8 4 8-4v-4l-.5-.3L12 16.2z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>夫子庙 · 秦淮河<small>Confucius Temple · Qinhuai River</small></h3>
+            <span class="badge cult">文化尾声</span>
+          </div>
+          <p>11:30 打车前往。这里是文庙而非佛寺，正好作为第三天的文化收尾：看大成殿、江南贡院、逛秦淮河，顺便吃饭、买伴手礼。</p>
+          <div class="tip"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 11h-2V7h2v6zm0 4h-2v-2h2v2z"/></svg>三个半小时含午餐与休整，节奏宽松——把礼佛的庄重，换成秦淮的烟火气收尾。</div>
+        </div>
+      </div>
+
+      <div class="transit"><span class="ic"><svg viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11h.5a1.5 1.5 0 0 1 1.5 1.5V17a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H7v1a1 1 0 0 1-2 0v-1H4a1 1 0 0 1-1-1v-4.5A1.5 1.5 0 0 1 4.5 11H5z"/></svg></span><span class="ln"></span>15:30–16:10 打车 · 夫子庙 → 南京南站</div>
+
+      <!-- 返程 -->
+      <div class="stop rv dusk">
+        <div class="time-col"><div class="t1">18:06</div><div class="t2">高铁返程</div></div>
+        <div class="rail"><div class="node"><svg viewBox="0 0 24 24"><path d="M12 2c-4 0-8 .5-8 4v9.5A3.5 3.5 0 0 0 7.5 19L6 20.5V21h12v-.5L16.5 19a3.5 3.5 0 0 0 3.5-3.5V6c0-3.5-4-4-8-4zM7.5 17A1.5 1.5 0 1 1 9 15.5 1.5 1.5 0 0 1 7.5 17zM11 11H6V6h5v5zm2 0V6h5v5h-5zm3.5 6a1.5 1.5 0 1 1 1.5-1.5 1.5 1.5 0 0 1-1.5 1.5z"/></svg></div></div>
+        <div class="card">
+          <div class="ctop">
+            <h3>南京南站 · 启程回家<small>Departure</small></h3>
+            <span class="badge night">18:06 高铁</span>
+          </div>
+          <p>16:10 前后到站，距离 18:06 的高铁时间很从容。三日礼佛，到此圆满。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIPS ============ -->
+<section class="tips" id="tips">
+  <div class="wrap">
+    <h2 class="rv">把节奏交给行程</h2>
+    <p class="sub rv">四个让这趟礼佛之旅更从容的小提醒</p>
+    <div class="tipgrid">
+      <div class="tg rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11h.5a1.5 1.5 0 0 1 1.5 1.5V17a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-2 0v-1H7v1a1 1 0 0 1-2 0v-1H4a1 1 0 0 1-1-1v-4.5A1.5 1.5 0 0 1 4.5 11H5zm2 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM6.8 11h10.4l-1-3H7.8l-1 3z"/></svg></div>
+        <h4>交通以打车为准</h4>
+        <p>寺院多在城郊与山间，全程以网约车 / 出租为主，省心也省体力。</p>
+      </div>
+      <div class="tg rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 15H5V9h14v10zM7 11h5v5H7z"/></svg></div>
+        <h4>夜场与票务先查</h4>
+        <p>大报恩寺夜游、登塔、点灯等活动，出发前以官方票务页确认当日开放。</p>
+      </div>
+      <div class="tg rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 12.5c-.6.7-.1 1.5.8 1.5H11l-1 8 8.5-10.5c.6-.7.1-1.5-.8-1.5H12l1-8z"/></svg></div>
+        <h4>不强爬、不久留</h4>
+        <p>栖霞山、九华山都浅尝即止，把体力留给祖庭古迹与核心殿塔。</p>
+      </div>
+      <div class="tg rv">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.6 4 2.3-1 1.7-5-2.9V6h2v6.6z"/></svg></div>
+        <h4>留出呼吸的余地</h4>
+        <p>每天都预留了午餐与转场缓冲，宁可少看一处，也不把时间排满。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="fart" aria-hidden="true">
+    <svg viewBox="0 0 120 200">
+      <rect x="44" y="160" width="32" height="40"/><path d="M10 160 L110 160 L92 132 L28 132 Z"/>
+      <rect x="34" y="96" width="52" height="36"/><path d="M16 96 L104 96 L88 72 L32 72 Z"/>
+      <rect x="40" y="44" width="40" height="28"/><path d="M24 44 L96 44 L82 22 L38 22 Z"/>
+      <path d="M60 22 L60 2" stroke="#E8B57A" stroke-width="6"/><circle cx="60" cy="4" r="6"/>
+    </svg>
+  </div>
+  <div class="wrap foot-in">
+    <div class="ftitle">三日问禅，<em>圆满</em>而归。<br>愿这趟旅程，慢得刚刚好。</div>
+    <div class="fmeta">
+      <div><b>6.20 – 6.22</b>南京 · 三日烧香之旅</div>
+      <div><b>9 处古刹</b>清凉 · 玄奘 · 大报恩 · 毗卢 · 栖霞 · 灵谷 · 鸡鸣</div>
+      <div><b>驻地</b>南京洲际酒店</div>
+    </div>
+    <div class="fnote">
+      <span>行程时间与活动以官方票务及现场为准 · 出行前请再次确认开放信息</span>
+      <span>为 马达 而做 · 慢游南京</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // sticky nav shadow
+  const nav=document.getElementById('nav');
+  addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>20));
+  // reveal on scroll
+  const io=new IntersectionObserver((es)=>{
+    es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
+  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.rv').forEach((el,i)=>{
+    el.style.transitionDelay=(i%4*0.06)+'s';
+    io.observe(el);
+  });
+</script>
 </body>
 </html>
